@@ -1,9 +1,24 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, IsUUID, Matches, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+	IsEmail,
+	IsOptional,
+	IsString,
+	IsStrongPassword,
+	IsUUID,
+	Matches,
+	MinLength,
+} from 'class-validator';
 
 export class CreateUserDto {
 	@IsUUID()
-	keycloakId: string;
+	@IsOptional()
+	@ApiPropertyOptional()
+	keycloakId?: string;
+
+	@IsStrongPassword()
+	@IsOptional()
+	@ApiPropertyOptional()
+	password?: string;
 
 	@ApiProperty()
 	@IsString()

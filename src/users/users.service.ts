@@ -1,5 +1,6 @@
 import {
 	BadGatewayException,
+	BadRequestException,
 	ConflictException,
 	HttpException,
 	Injectable,
@@ -11,6 +12,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import axios from 'axios';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +22,54 @@ export class UsersService {
 
 	async create(createUserDto: CreateUserDto) {
 		try {
+			if (!createUserDto.keycloakId && createUserDto.password) {
+				const firstName = createUserDto.name.split(' ')[0];
+				const lastName = createUserDto.name.split(' ').slice(1).join(' ');
+
+				const tokenResponse = await axios.post(
+					`${process.env.KEYCLOAK_AUTH_SERVER_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
+					new URLSearchParams({
+						grant_type: 'client_credentials',
+						client_id: process.env.KEYCLOAK_CLIENT_ID,
+						client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+					}),
+					{
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+						},
+					},
+				);
+
+				const adminToken = tokenResponse.data.access_token;
+
+				await axios.post(
+					`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users`,
+					{
+						firstName: firstName,
+						lastName: lastName,
+						email: createUserDto.email,
+						enabled: true,
+						emailVerified: true,
+						credentials: [
+							{
+								type: 'password',
+								value: createUserDto.password,
+								temporary: false,
+							},
+						],
+					},
+					{
+						headers: {
+							Authorization: `Bearer ${adminToken}`,
+							'Content-Type': 'application/json',
+						},
+					},
+				);
+			} else if (!createUserDto.keycloakId || !createUserDto.password)
+				throw new BadRequestException(
+					'You must provide a keycloakId or a password to create a user',
+				);
+
 			const user = this.usersRepository.create(createUserDto);
 
 			if (
@@ -32,6 +82,8 @@ export class UsersService {
 			return await this.usersRepository.save(user);
 		} catch (error) {
 			if (error instanceof HttpException) throw error;
+
+			if (error?.status) throw new HttpException(error.message, +error.status);
 
 			Logger.error(error.message, 'UsersService -> create');
 			throw new BadGatewayException(error.message);

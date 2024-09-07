@@ -1,15 +1,15 @@
 import {
-	ConflictException,
+	BadGatewayException,
+	HttpException,
 	Injectable,
 	InternalServerErrorException,
 	Logger,
-	UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import axios from 'axios';
+import { UsersService } from 'src/users/users.service';
 import LoginDto from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { UsersService } from 'src/users/users.service';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +39,14 @@ export class AuthService {
 
 			return response.data;
 		} catch (error) {
-			throw new UnauthorizedException('Credenciais inválidas');
+			if (error?.status)
+				throw new HttpException(
+					error?.response?.data?.error_description || error?.message,
+					+error.status,
+				);
+
+			Logger.error(error.message, 'AuthService -> login');
+			throw new BadGatewayException(error.message);
 		}
 	}
 
@@ -100,13 +107,13 @@ export class AuthService {
 
 			throw new Error(response.data?.message || 'Erro ao registrar usuário');
 		} catch (error) {
-			if (error.response && error.response.status === 409)
-				throw new ConflictException('Alredy exist a user with the same email');
+			if (error?.status)
+				throw new HttpException(
+					error?.response?.data?.errorMessage || error.message,
+					+error.status,
+				);
 
-			Logger.error(
-				JSON.stringify(error?.response?.data),
-				'AuthService -> register',
-			);
+			Logger.error(error.message, 'AuthService -> register');
 
 			throw new InternalServerErrorException(error.message);
 		}
