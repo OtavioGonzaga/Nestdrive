@@ -14,6 +14,9 @@ export class User {
 	@Column({ name: 'keycloak_id', type: 'uuid' })
 	keycloakId: string;
 
+	@Column({ name: 'username', type: 'varchar' })
+	username: string;
+
 	@Column({ name: 'name', type: 'varchar' })
 	name: string;
 

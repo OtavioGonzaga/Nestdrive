@@ -18,12 +18,12 @@ export class AuthService {
 		private readonly jwtService: JwtService,
 	) {}
 
-	async login({ email, password }: LoginDto) {
+	async login({ username, password }: LoginDto) {
 		try {
 			const params = new URLSearchParams();
 			params.append('client_id', process.env.KEYCLOAK_CLIENT_ID);
 			params.append('client_secret', process.env.KEYCLOAK_CLIENT_SECRET);
-			params.append('username', email);
+			params.append('username', username);
 			params.append('password', password);
 			params.append('grant_type', 'password');
 
@@ -50,7 +50,7 @@ export class AuthService {
 		}
 	}
 
-	async register({ name, email, password }: RegisterDto) {
+	async register({ username, name, email, password }: RegisterDto) {
 		try {
 			const firstName = name.split(' ')[0];
 			const lastName = name.split(' ').slice(1).join(' ');
@@ -76,7 +76,8 @@ export class AuthService {
 				{
 					firstName: firstName,
 					lastName: lastName,
-					email: email,
+					username,
+					email,
 					enabled: true,
 					emailVerified: true,
 					credentials: [
@@ -96,11 +97,11 @@ export class AuthService {
 			);
 
 			if (response.status === 201) {
-				const login = await this.login({ email, password });
+				const login = await this.login({ username, password });
 				const decodedToken = this.jwtService.decode(login.access_token);
 				const keycloakId = decodedToken['sub'];
 
-				this.usersService.create({ name, email, keycloakId });
+				await this.usersService.create({ username, name, email, keycloakId });
 
 				return login;
 			}

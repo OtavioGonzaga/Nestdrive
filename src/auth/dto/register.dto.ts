@@ -8,6 +8,11 @@ import {
 } from 'class-validator';
 
 export class RegisterDto {
+	@IsString()
+	@Matches(/^\S+$/, { message: 'The username cannot have white spaces' })
+	@ApiProperty()
+	username: string;
+
 	@ApiProperty()
 	@IsString()
 	@MinLength(3)

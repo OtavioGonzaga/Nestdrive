@@ -65,7 +65,7 @@ export class UsersService {
 						},
 					},
 				);
-			} else if (!createUserDto.keycloakId || !createUserDto.password)
+			} else if (!createUserDto.keycloakId && !createUserDto.password)
 				throw new BadRequestException(
 					'You must provide a keycloakId or a password to create a user',
 				);

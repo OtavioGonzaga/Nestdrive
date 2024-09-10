@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsStrongPassword } from 'class-validator';
+import { IsString, IsStrongPassword, Matches } from 'class-validator';
 
 export default class LoginDto {
-	@IsEmail()
+	@IsString()
+	@Matches(/^\S+$/, { message: 'The username cannot have white spaces' })
 	@ApiProperty()
-	email: string;
+	username: string;
 
 	@IsStrongPassword()
 	@ApiProperty()
