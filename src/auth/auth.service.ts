@@ -52,9 +52,6 @@ export class AuthService {
 
 	async register({ username, name, email, password }: RegisterDto) {
 		try {
-			const firstName = name.split(' ')[0];
-			const lastName = name.split(' ').slice(1).join(' ');
-
 			const tokenResponse = await axios.post(
 				`${process.env.KEYCLOAK_AUTH_SERVER_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
 				new URLSearchParams({
@@ -74,8 +71,7 @@ export class AuthService {
 			const response = await axios.post(
 				`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users`,
 				{
-					firstName: firstName,
-					lastName: lastName,
+					attributes: { name },
 					username,
 					email,
 					enabled: true,

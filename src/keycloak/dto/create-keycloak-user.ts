@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
 	IsEmail,
-	IsEnum,
 	IsOptional,
 	IsString,
 	IsStrongPassword,
@@ -9,7 +8,6 @@ import {
 	Matches,
 	MinLength,
 } from 'class-validator';
-import { KeycloakRoles } from 'src/common/enums/keycloak-roles.enum';
 
 export class CreateUserDto {
 	@IsUUID()
@@ -21,11 +19,6 @@ export class CreateUserDto {
 	@IsOptional()
 	@ApiPropertyOptional()
 	password?: string;
-
-	@ApiPropertyOptional()
-	@IsEnum(KeycloakRoles)
-	@IsOptional()
-	role?: KeycloakRoles;
 
 	@IsString()
 	@Matches(/^\S+$/, { message: 'The username cannot have white spaces' })

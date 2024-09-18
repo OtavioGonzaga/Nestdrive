@@ -3,10 +3,11 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { KeycloakService } from 'src/keycloak/keycloak.service';
 
 @Module({
 	controllers: [UsersController],
-	providers: [UsersService],
+	providers: [UsersService, KeycloakService],
 	exports: [UsersService],
 	imports: [TypeOrmModule.forFeature([User])],
 })

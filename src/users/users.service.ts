@@ -9,61 +9,24 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { KeycloakService } from '../keycloak/keycloak.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import axios from 'axios';
 
 @Injectable()
 export class UsersService {
 	constructor(
 		@InjectRepository(User) private readonly usersRepository: Repository<User>,
+		private readonly keycloakService: KeycloakService,
 	) {}
 
-	async create(createUserDto: CreateUserDto) {
+	public async create(createUserDto: CreateUserDto) {
 		try {
 			if (!createUserDto.keycloakId && createUserDto.password) {
-				const firstName = createUserDto.name.split(' ')[0];
-				const lastName = createUserDto.name.split(' ').slice(1).join(' ');
-
-				const tokenResponse = await axios.post(
-					`${process.env.KEYCLOAK_AUTH_SERVER_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
-					new URLSearchParams({
-						grant_type: 'client_credentials',
-						client_id: process.env.KEYCLOAK_CLIENT_ID,
-						client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
-					}),
-					{
-						headers: {
-							'Content-Type': 'application/x-www-form-urlencoded',
-						},
-					},
-				);
-
-				const adminToken = tokenResponse.data.access_token;
-
-				await axios.post(
-					`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users`,
-					{
-						firstName: firstName,
-						lastName: lastName,
-						email: createUserDto.email,
-						enabled: true,
-						emailVerified: true,
-						credentials: [
-							{
-								type: 'password',
-								value: createUserDto.password,
-								temporary: false,
-							},
-						],
-					},
-					{
-						headers: {
-							Authorization: `Bearer ${adminToken}`,
-							'Content-Type': 'application/json',
-						},
-					},
+				await this.keycloakService.createKeycloakUser(createUserDto);
+				createUserDto.keycloakId = await this.keycloakService.getKeycloakId(
+					createUserDto.username,
 				);
 			} else if (!createUserDto.keycloakId && !createUserDto.password)
 				throw new BadRequestException(
@@ -74,10 +37,13 @@ export class UsersService {
 
 			if (
 				await this.usersRepository.exists({
-					where: { email: createUserDto.email },
+					where: [
+						{ email: createUserDto.email },
+						{ username: createUserDto.username },
+					],
 				})
 			)
-				throw new ConflictException('Email already exists');
+				throw new ConflictException('Email or username already in use');
 
 			return await this.usersRepository.save(user);
 		} catch (error) {
@@ -90,7 +56,7 @@ export class UsersService {
 		}
 	}
 
-	async findAll() {
+	public async findAll() {
 		try {
 			return await this.usersRepository.find();
 		} catch (error) {
@@ -99,7 +65,7 @@ export class UsersService {
 		}
 	}
 
-	async findOne(id: string) {
+	public async findOne(id: string) {
 		try {
 			if (!(await this.usersRepository.exists({ where: { id } })))
 				throw new NotFoundException('User not found');
@@ -113,7 +79,7 @@ export class UsersService {
 		}
 	}
 
-	async update(id: string, updateUserDto: UpdateUserDto) {
+	public async update(id: string, updateUserDto: UpdateUserDto) {
 		try {
 			if (!(await this.usersRepository.exists({ where: { id } })))
 				throw new NotFoundException('User not found');

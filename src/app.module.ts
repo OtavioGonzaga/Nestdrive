@@ -13,6 +13,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { FilesModule } from './files/files.module';
+import { KeycloakService } from './keycloak/keycloak.service';
 
 @Module({
 	imports: [
@@ -54,6 +55,7 @@ import { FilesModule } from './files/files.module';
 			provide: APP_GUARD,
 			useClass: RoleGuard,
 		},
+		KeycloakService,
 	],
 })
 export class AppModule {}

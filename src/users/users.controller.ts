@@ -11,9 +11,12 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Roles } from 'nest-keycloak-connect';
+import { KeycloakRoles } from 'src/common/enums/keycloak-roles.enum';
 
 @Controller('users')
 @ApiTags('Users')
+@Roles({ roles: [KeycloakRoles.ADMIN] })
 export class UsersController {
 	constructor(private readonly usersService: UsersService) {}
 
