@@ -1,11 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
 
 @Injectable()
 export class FilesService {
-	create(createFileDto: CreateFileDto) {
-		return 'This action adds a new file';
+	create(file: Express.Multer.File) {
+		try {
+			return writeFile(
+				join(
+					'files',
+					Date.now().toString() + '.' + (file.mimetype.split('/')[1] || 'bin'),
+				),
+				file.buffer,
+			);
+		} catch (error) {
+			Logger.error(error);
+
+			throw new BadRequestException();
+		}
 	}
 
 	findAll() {

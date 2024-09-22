@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import axios from 'axios';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import axios, { AxiosResponse } from 'axios';
 import { KeycloakRoles } from 'src/common/enums/keycloak-roles.enum';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
@@ -46,24 +46,8 @@ export class KeycloakService {
 
 	public async createKeycloakUser(
 		createUserDto: CreateUserDto,
-	): Promise<string> {
-		const tokenResponse = await axios.post(
-			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
-			new URLSearchParams({
-				grant_type: 'client_credentials',
-				client_id: process.env.KEYCLOAK_CLIENT_ID,
-				client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
-			}),
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
-				},
-			},
-		);
-
-		const adminToken = tokenResponse.data.access_token;
-
-		return await axios.post(
+	): Promise<AxiosResponse<any, any>> {
+		return axios.post(
 			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users`,
 			{
 				attributes: { name: createUserDto.name },
@@ -81,7 +65,7 @@ export class KeycloakService {
 			},
 			{
 				headers: {
-					Authorization: `Bearer ${adminToken}`,
+					Authorization: `Bearer ${this.generateAdminToken()}`,
 					'Content-Type': 'application/json',
 				},
 			},
@@ -110,7 +94,7 @@ export class KeycloakService {
 		);
 
 		const roleData: { id: string; name: string } = rolesResponse.data.find(
-			(r) => r.name === role,
+			(r: { id: string; name: string }) => r.name === role,
 		);
 
 		return await axios.post(
@@ -121,6 +105,34 @@ export class KeycloakService {
 					name: roleData.name,
 				},
 			],
+			{
+				headers: {
+					Authorization: `Bearer ${adminToken}`,
+					'Content-Type': 'application/json',
+				},
+			},
+		);
+	}
+
+	public async forgotPassword(email: string) {
+		const adminToken: string = await this.generateAdminToken();
+
+		const userResponse: AxiosResponse<any, any> = await axios.get(
+			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users?email=${email}`,
+			{
+				headers: {
+					Authorization: `Bearer ${adminToken}`,
+				},
+			},
+		);
+
+		const user = userResponse.data[0];
+
+		if (!user) throw new NotFoundException('User not found');
+
+		await axios.put(
+			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users/${user.id}/execute-actions-email`,
+			['UPDATE_PASSWORD'],
 			{
 				headers: {
 					Authorization: `Bearer ${adminToken}`,

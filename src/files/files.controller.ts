@@ -1,5 +1,20 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { CreateFileDto } from './dto/create-file.dto';
+import {
+	Controller,
+	Delete,
+	FileTypeValidator,
+	Get,
+	MaxFileSizeValidator,
+	Param,
+	ParseFilePipe,
+	Post,
+	UploadedFile,
+	UploadedFiles,
+	UseInterceptors,
+} from '@nestjs/common';
+import {
+	FileFieldsInterceptor,
+	FileInterceptor,
+} from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 
 @Controller('files')
@@ -7,22 +22,46 @@ export class FilesController {
 	constructor(private readonly filesService: FilesService) {}
 
 	@Post()
-	create(@Body() createFileDto: CreateFileDto) {
-		return this.filesService.create(createFileDto);
+	@UseInterceptors(FileInterceptor('file'))
+	create(
+		@UploadedFile(
+			new ParseFilePipe({
+				validators: [
+					new FileTypeValidator({ fileType: 'image/*' }),
+					new MaxFileSizeValidator({ maxSize: 11 * 1024 }),
+				],
+			}),
+		)
+		file: Express.Multer.File,
+	) {
+		return this.filesService.create(file);
+	}
+	@Post('many')
+	@UseInterceptors(FileInterceptor('files'))
+	createMany(@UploadedFiles() files: Express.Multer.File[]) {
+		return files;
 	}
 
-	@Get()
-	findAll() {
-		return this.filesService.findAll();
-	}
-
-	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.filesService.findOne(+id);
-	}
-
-	@Delete(':id')
-	remove(@Param('id') id: string) {
-		return this.filesService.remove(+id);
+	@Post('fields')
+	@UseInterceptors(
+		FileFieldsInterceptor([
+			{
+				name: 'photo',
+				maxCount: 1,
+			},
+			{
+				name: 'documents',
+				maxCount: 10,
+			},
+		]),
+	)
+	createManyByFields(
+		@UploadedFiles()
+		files: {
+			photo: Express.Multer.File[];
+			documents: Express.Multer.File[];
+		},
+	) {
+		return [files.documents[0].mimetype, files.photo[0].mimetype];
 	}
 }

@@ -10,12 +10,16 @@ import axios from 'axios';
 import { UsersService } from 'src/users/users.service';
 import LoginDto from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { KeycloakService } from 'src/keycloak/keycloak.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly jwtService: JwtService,
+		private readonly keycloakService: KeycloakService,
+		private readonly mailerService: MailerService,
 	) {}
 
 	async login({ username, password }: LoginDto) {
@@ -52,45 +56,12 @@ export class AuthService {
 
 	async register({ username, name, email, password }: RegisterDto) {
 		try {
-			const tokenResponse = await axios.post(
-				`${process.env.KEYCLOAK_AUTH_SERVER_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
-				new URLSearchParams({
-					grant_type: 'client_credentials',
-					client_id: process.env.KEYCLOAK_CLIENT_ID,
-					client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
-				}),
-				{
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded',
-					},
-				},
-			);
-
-			const adminToken = tokenResponse.data.access_token;
-
-			const response = await axios.post(
-				`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users`,
-				{
-					attributes: { name },
-					username,
-					email,
-					enabled: true,
-					emailVerified: true,
-					credentials: [
-						{
-							type: 'password',
-							value: password,
-							temporary: false,
-						},
-					],
-				},
-				{
-					headers: {
-						Authorization: `Bearer ${adminToken}`,
-						'Content-Type': 'application/json',
-					},
-				},
-			);
+			const response = await this.keycloakService.createKeycloakUser({
+				email,
+				username,
+				password,
+				name,
+			});
 
 			if (response.status === 201) {
 				const login = await this.login({ username, password });
@@ -111,6 +82,20 @@ export class AuthService {
 				);
 
 			Logger.error(error.message, 'AuthService -> register');
+
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
+	async forgotPassword(email: string): Promise<void> {
+		try {
+			return await this.keycloakService.forgotPassword(email);
+		} catch (error) {
+			if (error instanceof HttpException) throw error;
+
+			if (error.status) throw new HttpException(error.message, +error.status);
+
+			Logger.error(error.message, 'AuthService -> forgotPassword');
 
 			throw new InternalServerErrorException(error.message);
 		}

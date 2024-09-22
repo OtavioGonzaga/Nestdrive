@@ -85,4 +85,11 @@ export class AuthController {
 	async logout() {
 		throw new NotImplementedException();
 	}
+
+	@Post('forgot-password')
+	@Public()
+	async forgotPassword(@Body('email') email: string) {
+		await this.authService.forgotPassword(email);
+		return { message: 'Verify your e-mail' };
+	}
 }
