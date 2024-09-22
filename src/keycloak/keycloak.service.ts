@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
+import LoginDto from 'src/auth/dto/login.dto';
 import { KeycloakRoles } from 'src/common/enums/keycloak-roles.enum';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { TokenResponseDto } from './dto/token-response.dto';
 
 @Injectable()
 export class KeycloakService {
@@ -10,21 +12,44 @@ export class KeycloakService {
 	 * @returns {string} admin token
 	 */
 	private async generateAdminToken(): Promise<string> {
-		const tokenResponse = await axios.post(
-			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
-			new URLSearchParams({
-				grant_type: 'client_credentials',
-				client_id: process.env.KEYCLOAK_CLIENT_ID,
-				client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
-			}),
-			{
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
+		const tokenResponse: AxiosResponse<TokenResponseDto, unknown> =
+			await axios.post(
+				`${process.env.KEYCLOAK_AUTH_SERVER_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
+				new URLSearchParams({
+					grant_type: 'client_credentials',
+					client_id: process.env.KEYCLOAK_CLIENT_ID,
+					client_secret: process.env.KEYCLOAK_CLIENT_SECRET,
+				}),
+				{
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
 				},
-			},
-		);
+			);
 
 		return tokenResponse.data.access_token;
+	}
+
+	public async login({ username, password }: LoginDto) {
+		const params = new URLSearchParams();
+		params.append('client_id', process.env.KEYCLOAK_CLIENT_ID);
+		params.append('client_secret', process.env.KEYCLOAK_CLIENT_SECRET);
+		params.append('username', username);
+		params.append('password', password);
+		params.append('grant_type', 'password');
+
+		const loginResponse: AxiosResponse<TokenResponseDto, unknown> =
+			await axios.post(
+				`${process.env.KEYCLOAK_AUTH_SERVER_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/token`,
+				params,
+				{
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+				},
+			);
+
+		return loginResponse.data;
 	}
 
 	public async getKeycloakId(username: string): Promise<string> {
@@ -46,7 +71,7 @@ export class KeycloakService {
 
 	public async createKeycloakUser(
 		createUserDto: CreateUserDto,
-	): Promise<AxiosResponse<any, any>> {
+	): Promise<AxiosResponse<string, unknown>> {
 		return axios.post(
 			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users`,
 			{
@@ -65,7 +90,7 @@ export class KeycloakService {
 			},
 			{
 				headers: {
-					Authorization: `Bearer ${this.generateAdminToken()}`,
+					Authorization: `Bearer ${await this.generateAdminToken()}`,
 					'Content-Type': 'application/json',
 				},
 			},
