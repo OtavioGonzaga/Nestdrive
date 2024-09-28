@@ -12,7 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'nest-keycloak-connect';
-import { KeycloakRoles } from 'src/common/enums/keycloak-roles.enum';
+import { KeycloakRoles } from '../../src/common/enums/keycloak-roles.enum';
 
 @Controller('users')
 @ApiTags('Users')

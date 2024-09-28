@@ -1,6 +1,7 @@
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from '../../../src/users/entities/user.entity';
 import { KeycloakRoles } from '../../../src/common/enums/keycloak-roles.enum';
+import { UpdateResult } from 'typeorm';
 
 export const userMock: User = {
 	id: '3a307019-5520-4544-986b-0c96734c4696',
@@ -13,17 +14,19 @@ export const userMock: User = {
 	updatedAt: new Date(),
 };
 
+export const updateUserMock: UpdateResult = {
+	generatedMaps: [],
+	raw: [],
+	affected: 1,
+};
+
 export const UserRepositoryMock = {
 	provide: getRepositoryToken(User),
 	useValue: {
 		exists: jest.fn().mockResolvedValue(true),
 		create: jest.fn().mockResolvedValue(userMock),
 		findOne: jest.fn().mockResolvedValue(userMock),
-		update: jest.fn().mockResolvedValue({
-			generatedMaps: [],
-			raw: [],
-			affected: 1,
-		}),
+		update: jest.fn().mockResolvedValue(updateUserMock),
 		save: jest.fn().mockResolvedValue(userMock),
 		delete: jest.fn(),
 		find: jest.fn().mockResolvedValue([userMock]),
