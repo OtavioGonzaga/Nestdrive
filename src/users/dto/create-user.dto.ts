@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { KeycloakRoles } from '../../common/enums/keycloak-roles.enum';
 import {
 	IsEmail,
 	IsEnum,
@@ -9,7 +10,6 @@ import {
 	Matches,
 	MinLength,
 } from 'class-validator';
-import { KeycloakRoles } from 'src/common/enums/keycloak-roles.enum';
 
 export class CreateUserDto {
 	@IsUUID()

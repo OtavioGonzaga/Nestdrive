@@ -21,7 +21,7 @@
 			"@files/*": ["files/*"],
 			"@utils/*": ["src/utils/*"],
 			"@typeorm/*": ["src/typeorm/*"],
-			"@commom": ["src/commom/*"]
+			"@commom/*": ["src/commom/*"]
 		}
 	}
 }

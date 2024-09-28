@@ -2,16 +2,15 @@ import {
 	BadGatewayException,
 	HttpException,
 	Injectable,
-	InternalServerErrorException,
 	Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import axios from 'axios';
-import { KeycloakService } from 'src/keycloak/keycloak.service';
-import { UsersService } from 'src/users/users.service';
 import LoginDto from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { TokenResponseDto } from 'src/keycloak/dto/token-response.dto';
+import { UsersService } from '../users/users.service';
+import { KeycloakService } from '../keycloak/keycloak.service';
+import { TokenResponseDto } from '../keycloak/dto/token-response.dto';
+import { KeycloakRoles } from '../common/enums/keycloak-roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -38,15 +37,21 @@ export class AuthService {
 
 	async register(registerDto: RegisterDto): Promise<TokenResponseDto> {
 		try {
-			const response =
-				await this.keycloakService.createKeycloakUser(registerDto);
+			const response = await this.keycloakService.createKeycloakUser({
+				...registerDto,
+				role: KeycloakRoles.STANDARD,
+			});
 
 			if (response.status === 201) {
 				const login = await this.login(registerDto);
 				const decodedToken = this.jwtService.decode(login.access_token);
 				const keycloakId = decodedToken['sub'];
 
-				await this.usersService.create({ ...registerDto, keycloakId });
+				await this.usersService.create({
+					...registerDto,
+					role: KeycloakRoles.STANDARD,
+					keycloakId,
+				});
 
 				return login;
 			}

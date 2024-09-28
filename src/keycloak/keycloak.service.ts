@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
-import LoginDto from 'src/auth/dto/login.dto';
-import { KeycloakRoles } from 'src/common/enums/keycloak-roles.enum';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import LoginDto from '../../src/auth/dto/login.dto';
+import { KeycloakRoles } from '../../src/common/enums/keycloak-roles.enum';
+import { CreateUserDto } from '../../src/users/dto/create-user.dto';
 import { TokenResponseDto } from './dto/token-response.dto';
 
 @Injectable()
@@ -72,7 +72,7 @@ export class KeycloakService {
 	public async createKeycloakUser(
 		createUserDto: CreateUserDto,
 	): Promise<AxiosResponse<string, unknown>> {
-		return axios.post(
+		const response = await axios.post(
 			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users`,
 			{
 				attributes: { name: createUserDto.name },
@@ -95,6 +95,15 @@ export class KeycloakService {
 				},
 			},
 		);
+
+		const keycloakId = await this.getKeycloakId(createUserDto.username);
+
+		await this.assingnUserRole(
+			keycloakId,
+			createUserDto.role ?? KeycloakRoles.STANDARD,
+		);
+
+		return response;
 	}
 
 	/**
@@ -109,7 +118,7 @@ export class KeycloakService {
 		const adminToken = await this.generateAdminToken();
 
 		const rolesResponse = await axios.get(
-			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/clients/${process.env.KEYCLOAK_CLIENT_ID}/roles`,
+			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/clients/${process.env.KEYCLOAK_CLIEND_UUID}/roles`,
 			{
 				headers: {
 					Authorization: `Bearer ${adminToken}`,
@@ -123,7 +132,7 @@ export class KeycloakService {
 		);
 
 		return await axios.post(
-			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users/${keycloakId}/role-mappings/clients/${process.env.KEYCLOAK_CLIENT_ID}`,
+			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users/${keycloakId}/role-mappings/clients/${process.env.KEYCLOAK_CLIEND_UUID}`,
 			[
 				{
 					id: roleData.id,

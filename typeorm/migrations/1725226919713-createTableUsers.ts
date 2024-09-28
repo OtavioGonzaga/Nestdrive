@@ -1,3 +1,4 @@
+import { KeycloakRoles } from 'src/common/enums/keycloak-roles.enum';
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 export class CreateUserTable1725142300549 implements MigrationInterface {
@@ -21,6 +22,7 @@ export class CreateUserTable1725142300549 implements MigrationInterface {
 					{
 						name: 'username',
 						type: 'varchar',
+						isUnique: true,
 					},
 					{
 						name: 'name',
@@ -30,6 +32,11 @@ export class CreateUserTable1725142300549 implements MigrationInterface {
 						name: 'email',
 						type: 'varchar',
 						isUnique: true,
+					},
+					{
+						name: 'role',
+						type: 'enum',
+						enum: ['admin', 'standard'],
 					},
 					{
 						name: 'created_at',

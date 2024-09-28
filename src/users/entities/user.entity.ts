@@ -1,3 +1,4 @@
+import { KeycloakRoles } from '../../../src/common/enums/keycloak-roles.enum';
 import {
 	Column,
 	CreateDateColumn,
@@ -22,6 +23,9 @@ export class User {
 
 	@Column({ name: 'email', type: 'varchar', unique: true })
 	email: string;
+
+	@Column({ name: 'role', type: 'enum', enum: KeycloakRoles })
+	role: KeycloakRoles;
 
 	@CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
 	createdAt: Date;

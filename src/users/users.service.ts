@@ -8,7 +8,7 @@ import {
 	NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -25,6 +25,7 @@ export class UsersService {
 		try {
 			if (!createUserDto.keycloakId && createUserDto.password) {
 				await this.keycloakService.createKeycloakUser(createUserDto);
+
 				createUserDto.keycloakId = await this.keycloakService.getKeycloakId(
 					createUserDto.username,
 				);
@@ -56,7 +57,7 @@ export class UsersService {
 		}
 	}
 
-	public async findAll() {
+	public async findAll(): Promise<User[]> {
 		try {
 			return await this.usersRepository.find();
 		} catch (error) {
@@ -65,12 +66,12 @@ export class UsersService {
 		}
 	}
 
-	public async findOne(id: string) {
+	public async findOne(id: string): Promise<User> {
 		try {
 			if (!(await this.usersRepository.exists({ where: { id } })))
 				throw new NotFoundException('User not found');
 
-			return await this.usersRepository.find({ where: { id } });
+			return await this.usersRepository.findOne({ where: { id } });
 		} catch (error) {
 			if (error instanceof HttpException) throw error;
 
@@ -79,10 +80,25 @@ export class UsersService {
 		}
 	}
 
-	public async update(id: string, updateUserDto: UpdateUserDto) {
+	public async update(
+		id: string,
+		updateUserDto: UpdateUserDto,
+	): Promise<UpdateResult> {
 		try {
 			if (!(await this.usersRepository.exists({ where: { id } })))
 				throw new NotFoundException('User not found');
+
+			if (updateUserDto.role) {
+				const { keycloakId } = await this.usersRepository.findOne({
+					where: { id },
+					select: { keycloakId: true },
+				});
+
+				await this.keycloakService.assingnUserRole(
+					keycloakId,
+					updateUserDto.role,
+				);
+			}
 
 			const user = this.usersRepository.create(updateUserDto);
 
