@@ -1,7 +1,10 @@
 import { UsersService } from '../../../src/users/users.service';
+import { userMock } from './user-repository.mock';
 
 export const UsersServiceMock = {
 	provide: UsersService,
-	useValue: {},
+	useValue: {
+		create: jest.fn().mockResolvedValue(userMock),
+	},
 };
 

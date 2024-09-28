@@ -12,9 +12,9 @@ describe('AuthService', () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				AuthService,
-				UsersServiceMock,
 				JwtServiceMock,
 				KeycloakServiceMock,
+				UsersServiceMock,
 			],
 		}).compile();
 
