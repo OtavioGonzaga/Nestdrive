@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FilesService } from './files.service';
-
+import { getFile } from '../../test/mocks/files/get-file.mock';
 describe('FilesService', () => {
 	let service: FilesService;
 
@@ -14,5 +14,11 @@ describe('FilesService', () => {
 
 	it('should be defined', () => {
 		expect(service).toBeDefined();
+	});
+
+	describe('Upload', () => {
+		it('should upload files', async () => {
+			service.create(await getFile());
+		});
 	});
 });
