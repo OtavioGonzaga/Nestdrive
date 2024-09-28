@@ -6,9 +6,8 @@ import {
 } from '../../test/mocks/users/user-repository.mock';
 import { UsersServiceMock } from '../../test/mocks/users/users-service.mock';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UsersController } from './users.controller';
-import { KeycloakRoles } from '../common/enums/keycloak-roles.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UsersController } from './users.controller';
 
 describe('UsersController', () => {
 	let controller: UsersController;
