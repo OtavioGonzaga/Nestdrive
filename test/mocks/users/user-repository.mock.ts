@@ -1,7 +1,7 @@
+import { KeycloakRoles } from '@common/enums/keycloak-roles.enum';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from '../../../src/users/entities/user.entity';
-import { KeycloakRoles } from '../../../src/common/enums/keycloak-roles.enum';
-import { UpdateResult } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import type { UpdateResult } from 'typeorm';
 
 export const userMock: User = {
 	id: '3a307019-5520-4544-986b-0c96734c4696',
@@ -32,4 +32,3 @@ export const UserRepositoryMock = {
 		find: jest.fn().mockResolvedValue([userMock]),
 	},
 };
-

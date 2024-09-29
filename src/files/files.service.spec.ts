@@ -1,6 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { FilesService } from './files.service';
-import { getFile } from '../../test/mocks/files/get-file.mock';
+import { getFile } from 'test/mocks/files/get-file.mock';
 describe('FilesService', () => {
 	let service: FilesService;
 

@@ -9,6 +9,7 @@ import { Public } from 'nest-keycloak-connect';
 import { AuthService } from './auth.service';
 import LoginDto from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { TokenResponseDto } from 'src/keycloak/dto/token-response.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -42,7 +43,7 @@ export class AuthController {
 	})
 	@ApiResponse({ status: 404, description: 'User not found' })
 	@ApiBody({ type: LoginDto })
-	login(@Body() credentials: LoginDto) {
+	login(@Body() credentials: LoginDto): Promise<TokenResponseDto> {
 		return this.authService.login(credentials);
 	}
 
@@ -65,7 +66,7 @@ export class AuthController {
 			scope: 'profile email',
 		},
 	})
-	async register(@Body() credentials: RegisterDto) {
+	async register(@Body() credentials: RegisterDto): Promise<TokenResponseDto> {
 		try {
 			return this.authService.register(credentials);
 		} catch (error) {
@@ -82,13 +83,15 @@ export class AuthController {
 		status: 501,
 		description: 'Not implemented (work in progress)',
 	})
-	async logout() {
+	async logout(): Promise<void> {
 		throw new NotImplementedException();
 	}
 
 	@Post('forgot-password')
 	@Public()
-	async forgotPassword(@Body('email') email: string) {
+	async forgotPassword(
+		@Body('email') email: string,
+	): Promise<{ message: string }> {
 		await this.authService.forgotPassword(email);
 		return { message: 'Verify your e-mail' };
 	}

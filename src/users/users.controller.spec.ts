@@ -1,12 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import {
 	updateUserMock,
 	userMock,
 	UserRepositoryMock,
 } from '../../test/mocks/users/user-repository.mock';
 import { UsersServiceMock } from '../../test/mocks/users/users-service.mock';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import type { CreateUserDto } from './dto/create-user.dto';
+import type { UpdateUserDto } from './dto/update-user.dto';
 import { UsersController } from './users.controller';
 
 describe('UsersController', () => {

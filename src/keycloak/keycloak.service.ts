@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
-import LoginDto from '../../src/auth/dto/login.dto';
-import { KeycloakRoles } from '../../src/common/enums/keycloak-roles.enum';
-import { CreateUserDto } from '../../src/users/dto/create-user.dto';
 import { TokenResponseDto } from './dto/token-response.dto';
+import { KeycloakRoles } from '@common/enums/keycloak-roles.enum';
+import LoginDto from 'src/auth/dto/login.dto';
+import { CreateKeycloakUserDto } from './dto/create-keycloak-user.dto';
+import { UserResponse } from './dto/user-response.dto';
 
 @Injectable()
 export class KeycloakService {
@@ -30,7 +31,10 @@ export class KeycloakService {
 		return tokenResponse.data.access_token;
 	}
 
-	public async login({ username, password }: LoginDto) {
+	public async login({
+		username,
+		password,
+	}: LoginDto): Promise<TokenResponseDto> {
 		const params = new URLSearchParams();
 		params.append('client_id', process.env.KEYCLOAK_CLIENT_ID);
 		params.append('client_secret', process.env.KEYCLOAK_CLIENT_SECRET);
@@ -70,7 +74,7 @@ export class KeycloakService {
 	}
 
 	public async createKeycloakUser(
-		createUserDto: CreateUserDto,
+		createUserDto: CreateKeycloakUserDto,
 	): Promise<AxiosResponse<string, unknown>> {
 		const response = await axios.post(
 			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users`,
@@ -148,19 +152,22 @@ export class KeycloakService {
 		);
 	}
 
-	public async forgotPassword(email: string) {
+	public async forgotPassword(email: string): Promise<void> {
 		const adminToken: string = await this.generateAdminToken();
 
-		const userResponse: AxiosResponse<any, any> = await axios.get(
-			`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users?email=${email}`,
-			{
-				headers: {
-					Authorization: `Bearer ${adminToken}`,
+		const userResponse: AxiosResponse<UserResponse[], unknown> =
+			await axios.get(
+				`${process.env.KEYCLOAK_AUTH_SERVER_URL}/admin/realms/${process.env.KEYCLOAK_REALM}/users?email=${email}`,
+				{
+					headers: {
+						Authorization: `Bearer ${adminToken}`,
+					},
 				},
-			},
-		);
+			);
 
 		const user = userResponse.data[0];
+
+		console.log(userResponse.data);
 
 		if (!user) throw new NotFoundException('User not found');
 

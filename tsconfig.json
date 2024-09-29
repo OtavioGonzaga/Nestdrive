@@ -9,7 +9,7 @@
 		"target": "ES2023",
 		"sourceMap": true,
 		"outDir": "./dist",
-		"baseUrl": "./",
+		"baseUrl": ".",
 		"incremental": true,
 		"skipLibCheck": true,
 		"strictNullChecks": false,
@@ -21,7 +21,7 @@
 			"@files/*": ["files/*"],
 			"@utils/*": ["src/utils/*"],
 			"@typeorm/*": ["src/typeorm/*"],
-			"@commom/*": ["src/commom/*"]
+			"@common/*": ["src/common/*"]
 		}
 	}
 }

@@ -1,0 +1,13 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@files/*": ["files/*"],
+			"@utils/*": ["src/utils/*"],
+			"@typeorm/*": ["src/typeorm/*"],
+			"@common/*": ["src/common/*"]
+		}
+	}
+}
+

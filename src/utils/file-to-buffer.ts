@@ -1,6 +1,10 @@
-import { createReadStream, ReadStream } from 'fs';
+import type { ReadStream } from 'fs';
+import { createReadStream } from 'fs';
 
-export default function filteToBuffer(filePath: string) {
+export default function filteToBuffer(filePath: string): Promise<{
+	stream: ReadStream;
+	buffer: Buffer;
+}> {
 	const readStream = createReadStream(filePath);
 	const chunks: Buffer[] = [];
 
@@ -19,4 +23,3 @@ export default function filteToBuffer(filePath: string) {
 		},
 	);
 }
-

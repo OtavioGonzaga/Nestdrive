@@ -1,15 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import type { Repository } from 'typeorm';
+import { KeycloakServiceMock } from 'test/mocks/keycloak/keycloak-service.mock';
 import {
+	updateUserMock,
 	userMock,
 	UserRepositoryMock,
-} from '../../test/mocks/users/user-repository.mock';
-import { UsersService } from './users.service';
-import { KeycloakServiceMock } from '../../test/mocks/keycloak/keycloak-service.mock';
-import { CreateUserDto } from './dto/create-user.dto';
-import { KeycloakRoles } from '../common/enums/keycloak-roles.enum';
-import { Repository } from 'typeorm';
+} from 'test/mocks/users/user-repository.mock';
 import { User } from './entities/user.entity';
-import { getRepositoryToken } from '@nestjs/typeorm';
+import { UsersService } from './users.service';
 
 describe('UserService', () => {
 	let usersService: UsersService;
@@ -89,13 +89,7 @@ describe('UserService', () => {
 				role: userMock.role,
 			});
 
-			expect(result).toBeDefined();
-			// expect(result.id).toBeDefined();
-			// expect(result.keycloakId).toBeDefined();
-			// expect(result.username).toBe(userMock.username);
-			// expect(result.name).toBe(userMock.name);
-			// expect(result.email).toBe(userMock.email);
-			// expect(result.role).toBe(userMock.role);
+			expect(result).toEqual(updateUserMock);
 		});
 	});
 });

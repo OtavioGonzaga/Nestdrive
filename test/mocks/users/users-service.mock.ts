@@ -1,4 +1,4 @@
-import { UsersService } from '../../../src/users/users.service';
+import { UsersService } from 'src/users/users.service';
 import { updateUserMock, userMock } from './user-repository.mock';
 
 export const UsersServiceMock = {
@@ -10,4 +10,3 @@ export const UsersServiceMock = {
 		update: jest.fn().mockResolvedValue(updateUserMock),
 	},
 };
-

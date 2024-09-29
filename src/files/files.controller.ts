@@ -1,10 +1,7 @@
 import {
 	Controller,
-	Delete,
 	FileTypeValidator,
-	Get,
 	MaxFileSizeValidator,
-	Param,
 	ParseFilePipe,
 	Post,
 	UploadedFile,
@@ -33,12 +30,14 @@ export class FilesController {
 			}),
 		)
 		file: Express.Multer.File,
-	) {
+	): Promise<void> {
 		return this.filesService.create(file);
 	}
 	@Post('many')
 	@UseInterceptors(FileInterceptor('files'))
-	createMany(@UploadedFiles() files: Express.Multer.File[]) {
+	createMany(
+		@UploadedFiles() files: Express.Multer.File[],
+	): Express.Multer.File[] {
 		return files;
 	}
 
@@ -61,7 +60,7 @@ export class FilesController {
 			photo: Express.Multer.File[];
 			documents: Express.Multer.File[];
 		},
-	) {
+	): string[] {
 		return [files.documents[0].mimetype, files.photo[0].mimetype];
 	}
 }

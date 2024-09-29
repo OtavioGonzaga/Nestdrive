@@ -1,4 +1,4 @@
-import { KeycloakService } from '../../../src/keycloak/keycloak.service';
+import { KeycloakService } from 'src/keycloak/keycloak.service';
 
 export const tokenResponseMock = {
 	access_token:
@@ -22,4 +22,3 @@ export const KeycloakServiceMock = {
 		login: jest.fn().mockResolvedValue(tokenResponseMock),
 	},
 };
-

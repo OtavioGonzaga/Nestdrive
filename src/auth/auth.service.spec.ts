@@ -1,9 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { JwtServiceMock } from '../../test/mocks/jwt/jwt-service.mock';
-import { KeycloakServiceMock } from '../../test/mocks/keycloak/keycloak-service.mock';
-import { userMock } from '../../test/mocks/users/user-repository.mock';
-import { UsersServiceMock } from '../../test/mocks/users/users-service.mock';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { AuthService } from './auth.service';
+import { JwtServiceMock } from 'test/mocks/jwt/jwt-service.mock';
+import { KeycloakServiceMock } from 'test/mocks/keycloak/keycloak-service.mock';
+import { userMock } from 'test/mocks/users/user-repository.mock';
+import { UsersServiceMock } from 'test/mocks/users/users-service.mock';
 
 describe('AuthService', () => {
 	let service: AuthService;

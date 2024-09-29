@@ -1,5 +1,5 @@
-import { KeycloakRoles } from 'src/common/enums/keycloak-roles.enum';
-import { MigrationInterface, QueryRunner, Table } from 'typeorm';
+import type { MigrationInterface, QueryRunner } from 'typeorm';
+import { Table } from 'typeorm';
 
 export class CreateUserTable1725142300549 implements MigrationInterface {
 	public async up(queryRunner: QueryRunner): Promise<void> {

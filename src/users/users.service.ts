@@ -21,7 +21,7 @@ export class UsersService {
 		private readonly keycloakService: KeycloakService,
 	) {}
 
-	public async create(createUserDto: CreateUserDto) {
+	public async create(createUserDto: CreateUserDto): Promise<User> {
 		try {
 			if (!createUserDto.keycloakId && createUserDto.password) {
 				await this.keycloakService.createKeycloakUser(createUserDto);

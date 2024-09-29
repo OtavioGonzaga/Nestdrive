@@ -1,10 +1,7 @@
-import { join } from 'path';
-import filteToBuffer from '../../../src/utils/file-to-buffer';
+import filteToBuffer from '@utils/file-to-buffer';
 
 export async function getFile(): Promise<Express.Multer.File> {
-	const { buffer, stream } = await filteToBuffer(
-		join(__dirname, '..', '..', '..', 'README.md'),
-	);
+	const { buffer, stream } = await filteToBuffer('README.md');
 
 	return {
 		fieldname: 'README',
@@ -19,4 +16,3 @@ export async function getFile(): Promise<Express.Multer.File> {
 		buffer,
 	};
 }
-

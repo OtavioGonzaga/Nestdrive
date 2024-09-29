@@ -7,10 +7,10 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import LoginDto from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { UsersService } from '../users/users.service';
-import { KeycloakService } from '../keycloak/keycloak.service';
-import { TokenResponseDto } from '../keycloak/dto/token-response.dto';
-import { KeycloakRoles } from '../common/enums/keycloak-roles.enum';
+import { KeycloakService } from 'src/keycloak/keycloak.service';
+import { KeycloakRoles } from '@common/enums/keycloak-roles.enum';
+import { TokenResponseDto } from 'src/keycloak/dto/token-response.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService {

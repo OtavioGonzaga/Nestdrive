@@ -25,4 +25,3 @@ export class TokenResponseDto {
 	@IsString()
 	scope: string;
 }
-
