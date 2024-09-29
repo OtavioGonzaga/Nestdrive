@@ -1,4 +1,4 @@
-import { KeycloakRoles } from '../../../src/common/enums/keycloak-roles.enum';
+import { KeycloakRoles } from '@common/enums/keycloak-roles.enum';
 import {
 	Column,
 	CreateDateColumn,

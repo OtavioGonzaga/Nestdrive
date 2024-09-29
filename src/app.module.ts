@@ -16,11 +16,13 @@ import { AuthModule } from './auth/auth.module';
 import { FilesModule } from './files/files.module';
 import { KeycloakService } from './keycloak/keycloak.service';
 import { UsersModule } from './users/users.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			isGlobal: true,
+			envFilePath: process.env.ENV === 'test' ? '.env.test.local' : '.env',
 		}),
 		MailerModule.forRoot({
 			transport: {
@@ -58,7 +60,7 @@ import { UsersModule } from './users/users.module';
 			username: process.env.DB_USERNAME,
 			password: process.env.DB_PASSWORD,
 			database: process.env.DB_DATABASE,
-			entities: ['dist/**/*.entity.js'],
+			entities: [User],
 		}),
 		KeycloakConnectModule.register({
 			authServerUrl: process.env.KEYCLOAK_AUTH_SERVER_URL,

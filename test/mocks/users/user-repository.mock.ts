@@ -5,9 +5,9 @@ import type { UpdateResult } from 'typeorm';
 
 export const userMock: User = {
 	id: '3a307019-5520-4544-986b-0c96734c4696',
-	keycloakId: '3a307019-5520-4544-986b-0c96734c4696',
+	keycloakId: 'e6cdaf9c-4b20-4435-b7bc-e3c8c1230330',
 	email: 'test@example.com',
-	username: 'test',
+	username: 'test.user',
 	name: 'Test User',
 	role: KeycloakRoles.STANDARD,
 	createdAt: new Date(),
